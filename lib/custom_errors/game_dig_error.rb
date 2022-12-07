@@ -1,0 +1,2 @@
+class GameDigError < StandardError
+end

@@ -1,0 +1,2 @@
+class GameDigCliNotFound < StandardError
+end
