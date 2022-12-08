@@ -13,3 +13,9 @@
 
 # rspec failure tracking
 .rspec_status
+
+
+/lib/node/node_modules
+/lib/node/yarn.lock
+/lib/node/package-lock.json
+/playground.rb

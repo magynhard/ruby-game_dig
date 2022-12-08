@@ -69,8 +69,11 @@ This will just run the gamedig cli and return its result.
     p data
 ```
 
-### Service wrapper (not implemented yet!)
-Behaves the same to the user, but runs a tiny node webservice in the background to avoid startup times.
+### Service wrapper (experimental, only did some testing on linux)
+
+Only the following parameters are implemented for the service wrapper: `type, host, protocol` (version 0.1.0)
+
+Behaves the same to the user, but runs a tiny node webservice in the background to avoid startup times when called more than one time.
 
 ```
 your-ruby-app 

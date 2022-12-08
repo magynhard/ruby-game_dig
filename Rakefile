@@ -19,4 +19,12 @@ task :cli do |t|
   require_relative 'cli/pry'
 end
 
+desc "start service cli to play with the environment"
+task :cli_service do |t|
+  puts
+  puts %{ Starting CLI ... }.red
+  puts
+  require_relative 'cli/pry_service'
+end
+
 RSpec::Core::RakeTask.new(:spec)

@@ -1,5 +1,9 @@
-require 'mkmf'
-require 'game_dig/version'
+require 'uri'
+require 'net/http'
+require 'json'
+
+require_relative 'game_dig/version'
+require_relative 'game_dig/game_dig_helper'
 require_relative 'custom_errors/game_dig_error'
 require_relative 'custom_errors/game_dig_cli_not_found'
 
@@ -10,6 +14,7 @@ require_relative 'custom_errors/game_dig_cli_not_found'
 module GameDig
 
   DEBUG_MESSAGE_END = 'Q#0 Query was successful'
+  @@node_service_up = false
 
   #----------------------------------------------------------------------------------------------------
 
@@ -25,7 +30,21 @@ module GameDig
   # @param [Boolean] debug
   # @param [Boolean] request_rules
   def self.query(type:, host:, port: nil, max_attempts: nil, socket_timeout: nil, attempt_timeout: nil, given_port_only: nil, debug: nil, request_rules: nil)
-    throw GameDigCliNotFound unless cli_installed?
+    if ENV['GAMEDIG_SERVICE'] == 'true'
+      perform_service_query(type: type, host: host, port: port, max_attempts: max_attempts, socket_timeout: socket_timeout, attempt_timeout: attempt_timeout, given_port_only: given_port_only, debug: debug, request_rules: request_rules)
+    else
+      perform_cli_query(type: type, host: host, port: port, max_attempts: max_attempts, socket_timeout: socket_timeout, attempt_timeout: attempt_timeout, given_port_only: given_port_only, debug: debug, request_rules: request_rules)
+    end
+  end
+
+  #----------------------------------------------------------------------------------------------------
+
+  private
+
+  #----------------------------------------------------------------------------------------------------
+
+  def self.perform_cli_query(type:, host:, port: nil, max_attempts: nil, socket_timeout: nil, attempt_timeout: nil, given_port_only: nil, debug: nil, request_rules: nil)
+    throw GameDigCliNotFound unless GameDigHelper.cli_installed?
     command = "gamedig --type #{type}"
     command += " --port #{port}" if port
     command += " --maxAttempts #{max_attempts}" if max_attempts
@@ -35,7 +54,6 @@ module GameDig
     command += " --debug #{debug}" if debug
     command += " --requestRules" if request_rules
     command += " #{host}"
-    puts command
     begin
       output = `#{command}`
       json = if debug
@@ -58,27 +76,33 @@ module GameDig
 
   #----------------------------------------------------------------------------------------------------
 
-  private
-
-  #
-  # Check if gamedig cli is installed globally
-  #
-  # @return [Boolean]
-  def self.cli_installed?()
-    !!(which 'gamedig')
+  def self.perform_service_query(type:, host:, port: nil, max_attempts: nil, socket_timeout: nil, attempt_timeout: nil, given_port_only: nil, debug: nil, request_rules: nil)
+    ensure_node_service_is_up
+    hostname = host
+    hostname += ":#{port}" if port
+    uri = URI("http://127.0.0.1:24445/#{type}/#{hostname}")
+    res = Net::HTTP.get_response(uri)
+    res.body
   end
 
   #----------------------------------------------------------------------------------------------------
 
-  def self.which(cmd)
-    exts = ENV['PATHEXT'] ? ENV['PATHEXT'].split(';') : ['']
-    ENV['PATH'].split(File::PATH_SEPARATOR).each do |path|
-      exts.each do |ext|
-        exe = File.join(path, "#{cmd}#{ext}")
-        return exe if File.executable?(exe) && !File.directory?(exe)
+  def self.ensure_node_service_is_up
+    max_counter = 100
+    counter = 0
+    unless @@node_service_up
+      loop do
+        counter += 1
+        if GameDigHelper.node_service_running?
+          break
+        elsif counter >= max_counter
+          raise "Node gamedig service did not boot up properly ..."
+          break
+        end
+        sleep 0.1
       end
+      @@node_service_up = true
     end
-    nil
   end
 
   #----------------------------------------------------------------------------------------------------
