@@ -100,10 +100,6 @@ As this library is only a wrapper, checkout the original node-gamedig documentat
 https://github.com/gamedig/node-gamedig
 
 
-
-
-
-
 <a name="contributing"></a>
 ## Contributing
 
@@ -111,3 +107,5 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/magynh
 
 This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
+## SEO keywords
+ruby gamedig game-dig game_dig
