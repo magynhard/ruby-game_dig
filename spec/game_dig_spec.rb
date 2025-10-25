@@ -42,12 +42,12 @@ RSpec.describe GameDig, '#query' do
 
         result = GameDig.query type: type, host: host, port: port
 
-        expect(result["name"]).to be_a(String)
-        expect(result["name"]).to eq("Mock Quake3 Server")
-        expect(result["map"]).to eq("q3dm17")
-        expect(result["max_players"]).to eq(16)
-        expect(result["players"]).to be_a(Array)
-        expect(result["players"].length).to eq(3)
+        expect(result.name).to be_a(String)
+        expect(result.name).to eq("Mock Quake3 Server")
+        expect(result.map).to eq("q3dm17")
+        expect(result.max_players).to eq(16)
+        expect(result.players).to be_a(Array)
+        expect(result.players.length).to eq(3)
       end
     end
 
@@ -61,11 +61,11 @@ RSpec.describe GameDig, '#query' do
         result = GameDig.query type: type, host: host, port: port
         result2 = GameDig.query type: type, host: host, port: port, debug: true
 
-        expect(result["name"]).to be_a(String)
-        expect(result["name"]).to eq("Mock Quake3 Server")
+        expect(result.name).to be_a(String)
+        expect(result.name).to eq("Mock Quake3 Server")
 
-        expect(result2["name"]).to be_a(String)
-        expect(result2["name"]).to eq("Mock Quake3 Server")
+        expect(result2.name).to be_a(String)
+        expect(result2.name).to eq("Mock Quake3 Server")
       end
     end
 
@@ -79,13 +79,13 @@ RSpec.describe GameDig, '#query' do
 
         result = GameDig.query type: type, host: host, port: port
 
-        expect(result["name"]).to be_a(String)
-        expect(result["name"]).to eq("Mock Quake3 Server")
-        expect(result["map"]).to eq("q3dm17")
-        expect(result["num_players"]).to eq(3)
-        expect(result["max_players"]).to eq(16)
-        expect(result["players"]).to be_a(Array)
-        expect(result["players"].length).to eq(3)
+        expect(result.name).to be_a(String)
+        expect(result.name).to eq("Mock Quake3 Server")
+        expect(result.map).to eq("q3dm17")
+        expect(result.num_players).to eq(3)
+        expect(result.max_players).to eq(16)
+        expect(result.players).to be_a(Array)
+        expect(result.players.length).to eq(3)
       end
     end
 
@@ -98,12 +98,17 @@ RSpec.describe GameDig, '#query' do
 
         result = GameDig.query type: type, host: host, port: port
 
-        expect(result["query_port"]).to eq(27968)
-        expect(result["queryPort"]).to eq(nil)
-        expect(result["num_players"]).to eq(3)
-        expect(result["numplayers"]).to eq(nil)
-        expect(result["max_players"]).to eq(16)
-        expect(result["maxplayers"]).to eq(nil)
+        expect(result.respond_to? :query_port).to eq(true)
+        expect(result.query_port).to eq(27968)
+        expect(result.respond_to? :queryPort).to eq(false)
+
+        expect(result.respond_to? :num_players).to eq(true)
+        expect(result.num_players).to eq(3)
+        expect(result.respond_to? :numplayers).to eq(false)
+
+        expect(result.respond_to? :max_players).to eq(true)
+        expect(result.max_players).to eq(16)
+        expect(result.respond_to? :maxplayers).to eq(false)
       end
     end
 
@@ -117,12 +122,17 @@ RSpec.describe GameDig, '#query' do
 
         result = GameDig.query type: type, host: host, port: port
 
-        expect(result["query_port"]).to eq(27969)
-        expect(result["queryPort"]).to eq(nil)
-        expect(result["num_players"]).to eq(3)
-        expect(result["numplayers"]).to eq(nil)
-        expect(result["max_players"]).to eq(16)
-        expect(result["maxplayers"]).to eq(nil)
+        expect(result.respond_to? :query_port).to eq(true)
+        expect(result.query_port).to eq(27969)
+        expect(result.respond_to? :queryPort).to eq(false)
+
+        expect(result.respond_to? :num_players).to eq(true)
+        expect(result.num_players).to eq(3)
+        expect(result.respond_to? :numplayers).to eq(false)
+
+        expect(result.respond_to? :max_players).to eq(true)
+        expect(result.max_players).to eq(16)
+        expect(result.respond_to? :maxplayers).to eq(false)
       end
     end
 

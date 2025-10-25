@@ -4,6 +4,8 @@ require 'json'
 
 require_relative 'game_dig/version'
 require_relative 'game_dig/helper'
+require_relative 'game_dig/query_result'
+
 require_relative 'custom_errors/error'
 require_relative 'custom_errors/cli_not_found'
 
@@ -43,16 +45,17 @@ module GameDig
   # @param [Boolean] port_cache=true After you queried a server, the second time you query that exact server (identified by specified ip and port), first add an attempt to query with the last successful port.
   # @param [Boolean] no_breadth_order=false Enable the behaviour of retrying an attempt X times followed by the next attempt X times, otherwise try attempt A, then B, then A, then B until reaching the X retry count of each.
   # @param [Boolean] check_old_ids=false Also checks the old ids amongst the current ones.
-  # @return [Hash] The response data from the server.
+  # @return [GameDig::QueryResult] The response data from the server.
   #
   def self.query(type:, host:, address: nil, port: nil, max_retries: nil, socket_timeout: nil, attempt_timeout: nil, given_port_only: nil, ip_family: nil, debug: nil, request_rules: nil, request_players: nil, request_rules_required: nil, request_players_required: nil, strip_colors: nil, port_cache: nil, no_breadth_order: nil, check_old_ids: nil)
-    if ENV['GAMEDIG_MODE'] == 'cli'
+    result = if ENV['GAMEDIG_MODE'] == 'cli'
       perform_cli_query(type: type, host: host, address: address, port: port, max_retries: max_retries, socket_timeout: socket_timeout, attempt_timeout: attempt_timeout, given_port_only: given_port_only, ip_family: ip_family, debug: debug, request_rules: request_rules, request_players: request_players, request_rules_required: request_rules_required, request_players_required: request_players_required, strip_colors: strip_colors, port_cache: port_cache, no_breadth_order: no_breadth_order, check_old_ids: check_old_ids)
     elsif ENV['GAMEDIG_MODE'] == 'nodo'
       perform_nodo_query(type: type, host: host, address: address, port: port, max_retries: max_retries, socket_timeout: socket_timeout, attempt_timeout: attempt_timeout, given_port_only: given_port_only, ip_family: ip_family, debug: debug, request_rules: request_rules, request_players: request_players, request_rules_required: request_rules_required, request_players_required: request_players_required, strip_colors: strip_colors, port_cache: port_cache, no_breadth_order: no_breadth_order, check_old_ids: check_old_ids)
     else
       raise "Unsupported GAMEDIG_MODE: #{ENV['GAMEDIG_MODE']}. Supported modes are 'cli' and 'nodo'."
     end
+    GameDig::QueryResult.new(result)
   end
 
   #----------------------------------------------------------------------------------------------------

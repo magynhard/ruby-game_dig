@@ -4,6 +4,7 @@
   * changed game type names, e.g. `quake3` -> `q3a`
   * changes query parametesr, e.g. `maxAttempts` -> `maxRetries`
   * and more ...
+* The returned is a new Object `GameDig::QueryResult` instead of a raw Hash now, which provides access by methods on first level, but can also be converted to a Hash by `#to_h`.
 * Now support all parameters for the CLI variant, as well for the nodo variant.
 
 ## 0.1.0

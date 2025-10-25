@@ -9,15 +9,12 @@ This is a Ruby wrapper gem for [node-gamedig](https://github.com/gamedig/node-ga
 
 
 
-
-
 # Contents
 
 * [Installation](#installation)
 * [Usage examples](#usage)
 * [Documentation](#documentation)
 * [Contributing](#contributing)
-
 
 
 
@@ -108,17 +105,30 @@ Here an example with all parameters, the camelCase parameters are converted to s
       no_breadth_order: false,
       check_old_ids: false
     )
-    p data
+    # => GameDig::QueryResult
+    
+    # Accessing data
+    puts data.max_players
+    # => 16
+    
+    # Accessing data as hash
+    puts data.to_h["max_players"]
+    # => 16
 ```
 
 ### Query response
-The response is a ruby hash with the same structure as the original node-gamedig response,
-but the key of `queryPort` is in snake_case `query_port` instead of camelCase. And the keys `numplayers` and `maxplayers` are `num_players` and `max_players` respectively.
+The default response object is of type `GameDig::QueryResult`.
+It contains the data returned by gamedig and provides accessors for all common keys.
+But the method of `queryPort` is in snake_case `query_port` instead of camelCase. And the methods `numplayers` and `maxplayers` are `num_players` and `max_players` respectively.
+
+The response can be converted to a ruby hash by `#to_h` with the same structure as the original node-gamedig response.
 
 The objects of `raw` and `bots` are untouched, as they may depend on the game type and are not modified by gamedig itself.
 
 For example:
 ```ruby
+data.to_h
+# =>
 {
   "name" => "My Minecraft Server",
   "map" => "world",
@@ -161,6 +171,3 @@ https://github.com/gamedig/node-gamedig
 Bug reports and pull requests are welcome on GitHub at https://github.com/magynhard/ruby-game_dig. 
 
 This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
-
-## SEO keywords
-ruby gamedig game-dig game_dig
