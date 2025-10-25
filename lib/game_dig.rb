@@ -3,9 +3,9 @@ require 'net/http'
 require 'json'
 
 require_relative 'game_dig/version'
-require_relative 'game_dig/game_dig_helper'
-require_relative 'custom_errors/game_dig_error'
-require_relative 'custom_errors/game_dig_cli_not_found'
+require_relative 'game_dig/helper'
+require_relative 'custom_errors/error'
+require_relative 'custom_errors/cli_not_found'
 
 # Set default mode to 'cli' if not specified
 ENV['GAMEDIG_MODE'] ||= 'cli'
@@ -21,13 +21,12 @@ module GameDig
 
   #
   # Query a server for insight data.
-  # Raises GameDigError on failure.
+  # Raises GameDig::Error on failure.
   #
   # 'type' and 'host' are required parameters, all others are optional.
   #
   # @param [String] type One of the game type IDs listed in the games list: https://github.com/gamedig/node-gamedig/blob/master/GAMES_LIST.md Or you can use protocol-[name] to select a specific protocol. Protocols are listed here: https://github.com/gamedig/node-gamedig/blob/master/protocols/index.js
   # @param [String] host The hostname or IP address of the server to query
-  #
   # @param [String] address=nil Override the IP address of the server skipping DNS resolution. When set, host will not be resolved, instead address will be connected to. However, some protocols still use host for other reasons e.g. as part of the query.
   # @param [Number] port Connection port or query port for the game server. Some games utilize a separate "query" port. If specifying the game port does not seem to work as expected, passing in this query port may work instead.
   # @param [Number] max_retries=1 Number of retries to query server in case of failure. Note that this amount multiplies with the number of attempts.
@@ -44,7 +43,7 @@ module GameDig
   # @param [Boolean] port_cache=true After you queried a server, the second time you query that exact server (identified by specified ip and port), first add an attempt to query with the last successful port.
   # @param [Boolean] no_breadth_order=false Enable the behaviour of retrying an attempt X times followed by the next attempt X times, otherwise try attempt A, then B, then A, then B until reaching the X retry count of each.
   # @param [Boolean] check_old_ids=false Also checks the old ids amongst the current ones.
-  # @return [Hash] The server data as a Hash
+  # @return [Hash] The response data from the server.
   #
   def self.query(type:, host:, address: nil, port: nil, max_retries: nil, socket_timeout: nil, attempt_timeout: nil, given_port_only: nil, ip_family: nil, debug: nil, request_rules: nil, request_players: nil, request_rules_required: nil, request_players_required: nil, strip_colors: nil, port_cache: nil, no_breadth_order: nil, check_old_ids: nil)
     if ENV['GAMEDIG_MODE'] == 'cli'
@@ -63,7 +62,7 @@ module GameDig
   #----------------------------------------------------------------------------------------------------
 
   def self.perform_cli_query(type:, host:, address: nil, port: nil, max_retries: nil, socket_timeout: nil, attempt_timeout: nil, given_port_only: nil, ip_family: nil, debug: nil, request_rules: nil, request_players: nil, request_rules_required: nil, request_players_required: nil, strip_colors: nil, port_cache: nil, no_breadth_order: nil, check_old_ids: nil)
-    throw GameDigCliNotFound unless GameDigHelper.cli_installed?
+    throw GameDig::CliNotFound unless GameDig::Helper.cli_installed?
     command = "gamedig --type #{type}"
     command += " --port #{port}" if port
     command += " --address #{address}" if address
@@ -94,16 +93,24 @@ module GameDig
         response['debug'] = output[0...(output.index(DEBUG_MESSAGE_END) + DEBUG_MESSAGE_END.size)]
       end
       if response['error']
-        raise GameDigError.new response['error']
+        raise GameDig::Error.new response['error']
       end
-      response
+      normalize_response response
     rescue => e
       raise e
     end
   end
 
   def self.perform_nodo_query(type:, host:, address: nil, port: nil, max_retries: nil, socket_timeout: nil, attempt_timeout: nil, given_port_only: nil, ip_family: nil, debug: nil, request_rules: nil, request_players: nil, request_rules_required: nil, request_players_required: nil, strip_colors: nil, port_cache: nil, no_breadth_order: nil, check_old_ids: nil)
-    GameDigNodo.query(type, host, address, port, max_retries, socket_timeout, attempt_timeout, given_port_only, ip_family, debug, request_rules, request_players, request_rules_required, request_players_required, strip_colors, port_cache, no_breadth_order, check_old_ids)
+    result = GameDig::Nodo.query(type, host, address, port, max_retries, socket_timeout, attempt_timeout, given_port_only, ip_family, debug, request_rules, request_players, request_rules_required, request_players_required, strip_colors, port_cache, no_breadth_order, check_old_ids)
+    normalize_response result
+  end
+
+  def self.normalize_response(response)
+    response["query_port"] = response.delete("queryPort") if response.key?("queryPort")
+    response["max_players"] = response.delete("maxplayers").to_i if response.key?("maxplayers")
+    response["num_players"] = response.delete("numplayers").to_i if response.key?("numplayers")
+    response
   end
 
 end

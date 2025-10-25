@@ -111,6 +111,40 @@ Here an example with all parameters, the camelCase parameters are converted to s
     p data
 ```
 
+### Query response
+The response is a ruby hash with the same structure as the original node-gamedig response,
+but the key of `queryPort` is in snake_case `query_port` instead of camelCase. And the keys `numplayers` and `maxplayers` are `num_players` and `max_players` respectively.
+
+The objects of `raw` and `bots` are untouched, as they may depend on the game type and are not modified by gamedig itself.
+
+For example:
+```ruby
+{
+  "name" => "My Minecraft Server",
+  "map" => "world",
+  "password" => false,
+  "num_players" => 5,
+  "max_players" => 20,
+  "players" => [
+    { "name" => "Player1", "raw" => {} },
+    { "name" => "Player2", "raw" => {} },
+  # ...
+  ],
+  "bots" => [
+    { "name" => "Bot1", "raw" => {} },
+    { "name" => "Bot2", "raw" => {} },
+  # ...
+  ],
+  "connect" => "my-server.example.com:25565",
+  "ping" => 45,
+  "query_port" => 25565,
+  "version" => "1.16.4",
+  "raw" => {
+    # ...
+  }
+}    
+```
+
 <a name="documentation"></a>
 ## Documentation
 Check out the doc at RubyDoc:<br>

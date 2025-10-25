@@ -1,2 +1,0 @@
-class GameDigCliNotFound < StandardError
-end
