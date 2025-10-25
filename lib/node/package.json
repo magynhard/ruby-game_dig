@@ -1,9 +1,0 @@
-{
-  "scripts": {
-    "start": "node ./gamedig-service.js"
-  },
-  "dependencies": {
-    "@hapi/hapi": "^21.1.0",
-    "gamedig": "^4.0.5"
-  }
-}

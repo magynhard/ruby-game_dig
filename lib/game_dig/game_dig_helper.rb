@@ -3,25 +3,6 @@ require 'net/http'
 
 class GameDigHelper
 
-  #----------------------------------------------------------------------------------------------------
-
-  def self.node_service_running?
-    port_open? '127.0.0.1', 24445
-  end
-
-  #----------------------------------------------------------------------------------------------------
-
-  def self.stop_node_service
-    begin
-      uri = URI("http://127.0.0.1:24445/exit")
-      res = Net::HTTP.get_response(uri)
-    rescue Errno::ECONNREFUSED => e
-      # will be refused, as /exit closes the server and makes no more response
-    end
-  end
-
-  #----------------------------------------------------------------------------------------------------
-
   #
   # Check if gamedig cli is installed globally
   #

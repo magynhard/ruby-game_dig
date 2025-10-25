@@ -3,9 +3,9 @@
 ![downloads](https://img.shields.io/gem/dt/game_dig?color=blue&style=plastic)
 [![License: MIT](https://img.shields.io/badge/License-MIT-gold.svg?style=plastic&logo=mit)](LICENSE)
 
-> Ruby wrapper gem for [node-gamedig](https://github.com/gamedig/node-gamedig).
+> Query game servers from Ruby powered by [node-gamedig](https://github.com/gamedig/node-gamedig). 
 
-Providing support to use the node cli or running a tiny webservice for faster responses.
+This is a Ruby wrapper gem for [node-gamedig](https://github.com/gamedig/node-gamedig), providing support to use the node cli or running a node process with [nodo](https://github.com/mtgrosser/nodo) for faster responses.
 
 
 
@@ -24,9 +24,7 @@ Providing support to use the node cli or running a tiny webservice for faster re
 <a name="installation"></a>
 ## Installation
 ### Prerequisites
-NodeJS or a compatible alternative is installed.
-
-Then install the gamedig package with your favourite package manager globally, e.g. here with npm or yarn:
+For using the CLI variant, install the gamedig package with your favourite package manager globally, e.g. here with npm or yarn:
 
 #### yarn
 ```
@@ -37,6 +35,9 @@ Then install the gamedig package with your favourite package manager globally, e
 ```
     npm install -g gamedig
 ```
+
+For the nodo variant, NodeJS >= 22.x is installed and available via commandline (in PATH).
+
 
 ### Gem
 
@@ -58,7 +59,7 @@ Or install it yourself as:
 <a name="usage"></a>
 ## Usage examples
 
-You can use the basic cli wrapper or the tiny webservice instance.
+You can use the basic cli wrapper or the nodo instance.
 
 ### CLI wrapper
 
@@ -69,24 +70,44 @@ This will just run the gamedig cli and return its result.
     p data
 ```
 
-### Service wrapper (experimental, only did some testing on linux)
+### Nodo wrapper
+This will start a node process in the background and communicate with it using the nodo gem.
 
-Only the following parameters are implemented for the service wrapper: `type, host, protocol` (version 0.1.0)
-
-Behaves the same to the user, but runs a tiny node webservice in the background to avoid startup times when called more than one time.
-
-```
-your-ruby-app 
-    --------> ruby-game_dig 
-        --------> tiny node instance in a separate thread using gamedig node module
-<----------------    
-```
-
-It needs only about half of the query time, but might be not as stable as it involves much more complexity. (about 10ms vs 20ms)
-
+As this prevents starting a new node process for each query, this is much faster for multiple queries.
 ```ruby
-    require 'game_dig/service'
+    require 'game_dig/nodo'
     data = GameDig.query(type: 'minecraft', host: 'my-server.example.com')
+    p data
+```
+
+### Query parameters
+You can pass all parameters supported by node-gamedig, checkout the [rubydoc for more details](https://www.rubydoc.info/gems/game_dig/GameDig).
+
+Here an example with all parameters, the camelCase parameters are converted to snake_case in ruby:
+```ruby
+    require 'game_dig'
+    data = GameDig.query(
+      # mandatory parameters
+      type: 'minecraft',
+      host: 'my-server.example.com',
+      # optional parameters
+      address: '119.212.123.34', # overrides host and skips DNS lookup
+      port: 25565, # optional, default depends on game type
+      max_retries: 1, # number of retry attempts
+      socket_timeout: 2000, 
+      attempt_timeout: 10000,
+      given_port_only: false,
+      ip_family: 0,
+      debug: false,
+      request_rules: false,
+      request_players: true,
+      request_rules_required: false,
+      request_players_required: false,
+      strip_colors: true,
+      port_cache: true,
+      no_breadth_order: false,
+      check_old_ids: false
+    )
     p data
 ```
 
